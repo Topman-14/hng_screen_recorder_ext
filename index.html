@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamed Video</title>
+</head>
+<body>
+    <h1>Streamed Video</h1>
+    <video controls id="streamedVideo">
+        Your browser does not support the video tag.
+    </video>
+
+    <script>
+        async function fetchVideoWithRangeHeader() {
+            try {
+                const videoUrl = 'http://localhost:5000/stream/video_1696209140972.mp4';
+                const startByte = 0; // Specify the start byte of the range
+                const endByte = 999; // Specify the end byte of the range
+
+                const headers = {
+                    Range: `bytes=${startByte}-${endByte}`,
+                };
+
+                const response = await fetch(videoUrl, {
+                    method: 'GET',
+                    headers,
+                    mode: 'cors', // Set the request mode to 'cors'
+                });
+
+                if (response.status === 206) {
+                    const videoBlob = await response.blob();
+                    const videoUrlBlob = URL.createObjectURL(videoBlob);
+
+                    const videoElement = document.getElementById('streamedVideo');
+                    videoElement.src = videoUrlBlob;
+
+                    console.log('Video fetched and loaded successfully.');
+                } else {
+                    console.error('Error: Video range request not satisfied (Status:', response.status, ')');
+                }
+            } catch (error) {
+                console.error('Error fetching video:', error.message);
+            }
+        }
+
+        // Call the function to fetch and display the video
+        fetchVideoWithRangeHeader();
+    </script>
+</body>
+</html>
